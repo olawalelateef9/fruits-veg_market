@@ -209,3 +209,6 @@ __marimo__/
 
 # java
 target
+# terraform
+.terraform
+.terraform.lock.hcl
