@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
+        AWS_DEFAULT_REGION    = 'us-east-2'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Packer init') {
+            steps {
+                dir('packer') {
+                    sh 'packer init .'
+                }
+            }
+        }
+        
+        stage('Packer validate') {
+            steps {
+                dir('packer') {
+                    sh 'packer validate .'
+                }
+            }
+        }
+        
+        stage('Packer build') {
+            steps {
+                dir('packer') {
+                    sh 'packer build .'
+                }
+            }
+        }
+    }
+}
