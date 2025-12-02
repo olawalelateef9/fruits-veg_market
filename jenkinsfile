@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'TF_ACTION', // Fix 1: Using choice() function call syntax.
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Choose the Terraform action to perform'
+        )
+    }
+    
+    environment {
+        AWS_SECRET_ACCESS_KEY = credentials ('aws_secret_access_key')
+        AWS_ACCESS_KEY_ID     = credentials ('aws_access_key_id')
+        AWS_DEFAULT_REGION    = 'us-east-2'
+    }
+    
+    stages {
+        stage('Git checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/olawalelateef9/fruits-veg_market.git'
+                sh 'ls -ltr'
+            }
+        }
+        
+        stage('Terraform init') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform init'
+                }
+            }
+        }
+        
+        stage('Terraform validate') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform validate .'
+                }
+            }
+        }
+        
+        stage('Terraform plan') {
+            when {
+                expression { params.TF_ACTION == 'plan' }
+            }
+            steps {
+                dir('terraform') {
+                    sh 'terraform plan'
+                }
+            }
+        }
+        
+        stage('Terraform apply') {
+            when {
+                expression { params.TF_ACTION == 'apply' }
+            }
+            steps {
+                dir('terraform') {
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
+        
+        stage('Terraform destroy') {
+            when {
+                expression { params.TF_ACTION == 'destroy' }
+            }
+            steps {
+                dir('terraform') {
+                    sh 'terraform destroy -auto-approve'
+                }
+            }
+        }
+    }
+}
