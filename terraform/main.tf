@@ -26,7 +26,7 @@ provider "aws" {
 resource "aws_instance" "frontend_nginx" {
   ami                    = "ami-054f42f3b4c78e8aa"
   instance_type          = "t2.medium"
-  subnet_id              = "subnet-0786335ea9e3bbe1d"
+  subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = ["sg-01ce2395a89767248"]
   key_name               = "MasterClass9"
 
@@ -42,7 +42,7 @@ resource "aws_instance" "frontend_nginx" {
 resource "aws_instance" "backend_python" {
   ami                    = "ami-05d520d4ac0d6e443"
   instance_type          = "t2.medium"
-  subnet_id              = "subnet-0786335ea9e3bbe1d"
+  subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = ["sg-01ce2395a89767248"]
   key_name               = "MasterClass9"
 
@@ -59,7 +59,7 @@ resource "aws_instance" "backend_python" {
 resource "aws_instance" "backend_java" {
   ami                    = "ami-05d520d4ac0d6e443"
   instance_type          = "t2.medium"
-  subnet_id              = "subnet-0786335ea9e3bbe1d"
+  subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = ["sg-01ce2395a89767248"]
   key_name               = "MasterClass9"
 
