@@ -24,7 +24,7 @@ pipeline {
         
         stage('Packer init') {
              when {
-                expression { params.TF_ACTION == 'init' }
+                expression { params.PKR_ACTION == 'init' }
             }
             steps {
                 dir('packer') {
@@ -35,7 +35,7 @@ pipeline {
         
         stage('Packer validate') {
              when {
-                expression { params.TF_ACTION == 'validate' }
+                expression { params.PKR_ACTION == 'validate' }
             }
             steps {
                 dir('packer') {
@@ -46,7 +46,7 @@ pipeline {
         
         stage('Packer build') {
              when {
-                expression { params.TF_ACTION == 'build' }
+                expression { params.PKR_ACTION == 'build' }
             }
             steps {
                 dir('packer') {
