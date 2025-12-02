@@ -24,8 +24,8 @@ provider "aws" {
 #-Node 1: Frontend/Tier 1 (NGINX)
 #--------------------------------
 resource "aws_instance" "frontend_nginx" {
-  ami                    = "ami-017192bbe2d94cfce"
-  instance_type          = "t3.micro"
+  ami                    = "ami-054f42f3b4c78e8aa"
+  instance_type          = "t2.medium"
   subnet_id              = "subnet-0786335ea9e3bbe1d"
   vpc_security_group_ids = ["sg-01ce2395a89767248"]
   key_name               = "MasterClass9"
@@ -40,8 +40,8 @@ resource "aws_instance" "frontend_nginx" {
 #-Node 2: Backend/Tier 2 (Python 3) - runs on port 8080
 #------------------------------------------------------
 resource "aws_instance" "backend_python" {
-  ami                    = "ami-06b9f81551de61fce"
-  instance_type          = "t3.micro"
+  ami                    = "ami-05d520d4ac0d6e443"
+  instance_type          = "t2.medium"
   subnet_id              = "subnet-0786335ea9e3bbe1d"
   vpc_security_group_ids = ["sg-01ce2395a89767248"]
   key_name               = "MasterClass9"
@@ -57,8 +57,8 @@ resource "aws_instance" "backend_python" {
 #-Node 3: Backend/Tier 2 (Java 17) - runs on port 9090
 #-----------------------------------------------------
 resource "aws_instance" "backend_java" {
-  ami                    = "ami-06b9f81551de61fce"
-  instance_type          = "t3.micro"
+  ami                    = "ami-05d520d4ac0d6e443"
+  instance_type          = "t2.medium"
   subnet_id              = "subnet-0786335ea9e3bbe1d"
   vpc_security_group_ids = ["sg-01ce2395a89767248"]
   key_name               = "MasterClass9"
