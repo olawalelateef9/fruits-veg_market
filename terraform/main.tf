@@ -1,6 +1,9 @@
 terraform {
-  backend "local" {
-    path = "/tmp/terraform.tfstate"
+  backend "s3" {
+    bucket = "olawale-s3-devops-bucket"
+    key    = "envs/dev/terraform.tfstate"
+    region = "us-east-2"
+    encrypt = true
   }
   required_version = ">= 1.6.0"
 
