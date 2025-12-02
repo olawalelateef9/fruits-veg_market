@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         choice(
-            name: 'TF_ACTION', // Fix 1: Using choice() function call syntax.
+            name: 'TF_ACTION', 
             choices: ['plan', 'apply', 'destroy'],
             description: 'Choose the Terraform action to perform'
         )
@@ -18,9 +18,7 @@ pipeline {
     stages {
         stage('Git checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/olawalelateef9/fruits-veg_market.git'
-                sh 'ls -ltr'
+                checkout scm
             }
         }
         
