@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+     parameters {
+        choice(
+            name: 'TF_ACTION', 
+            choices: ['init', 'validate', 'build'],
+            description: 'Choose the Packer action to perform'
+        )
+    }
+
     environment {
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
         AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
