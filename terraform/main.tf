@@ -28,7 +28,7 @@ resource "aws_instance" "frontend_nginx" {
   instance_type          = "t2.medium"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = ["sg-01c7285d8b90bdd46"]
-  key_name               = "MasterClass9"
+  key_name               = "jenkinskp"
 
   tags = {
     Name = "Node-1-Frontend-NGINX"
@@ -44,7 +44,7 @@ resource "aws_instance" "backend_python" {
   instance_type          = "t2.medium"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = ["sg-01c7285d8b90bdd46"]
-  key_name               = "MasterClass9"
+  key_name               = "jenkinskp"
 
   tags = {
     Name = "Node-2-Backend-Python-8080"
@@ -61,7 +61,7 @@ resource "aws_instance" "backend_java" {
   instance_type          = "t2.medium"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = ["sg-01c7285d8b90bdd46"]
-  key_name               = "MasterClass9"
+  key_name               = "jenkinskp"
 
   tags = {
     Name = "Node-3-Backend-Java-9090"
