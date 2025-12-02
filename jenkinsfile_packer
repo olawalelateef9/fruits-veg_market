@@ -3,7 +3,7 @@ pipeline {
 
      parameters {
         choice(
-            name: 'TF_ACTION', 
+            name: 'PKR_ACTION', 
             choices: ['init', 'validate', 'build'],
             description: 'Choose the Packer action to perform'
         )
