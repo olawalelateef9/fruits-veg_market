@@ -88,7 +88,7 @@ resource "aws_instance" "backend_python" {
   ami                    = "ami-05d520d4ac0d6e443"
   instance_type          = "t2.medium"
   subnet_id              = "subnet-03e8a88d085ee2c50"
-  vpc_security_group_ids = ["aws_security_group.web_sg.id"]
+  vpc_security_group_ids = ["vpc-0554333af64d61d92"]
   key_name               = "jenkinskp"
 
   tags = {
@@ -103,7 +103,7 @@ resource "aws_instance" "backend_java" {
   ami                    = "ami-05d520d4ac0d6e443"
   instance_type          = "t2.medium"
   subnet_id              = "subnet-03e8a88d085ee2c50"
-  vpc_security_group_ids = ["aws_security_group.web_sg.id"]
+  vpc_security_group_ids = ["vpc-0554333af64d61d92"]
   key_name               = "jenkinskp"
 
   tags = {
