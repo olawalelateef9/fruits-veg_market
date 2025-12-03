@@ -76,9 +76,9 @@ resource "aws_instance" "web_node" {
   }
 }
 
-#------------------------------------------------------
-#-Node 2: Backend/Tier 2 (Python 3) - runs on port 8080
-#------------------------------------------------------
+#-------------------------------------------------------------
+#-Node 2: Backend/Tier 2 (Python 3) Security Group (port 8080)
+#-------------------------------------------------------------
 resource "aws_security_group" "python_sg" {
   name        = "python_sg"
   description = "Allow SSH and Port 8080 inbound, all outbound"
@@ -117,14 +117,10 @@ resource "aws_security_group" "python_sg" {
 
 }
 
-########################
+#########################################
 #-Python EC2 Instances
-########################
+#########################################
 
-
-#--------------------------------
-#-Node 1: Frontend/Tier 1 (NGINX)
-#--------------------------------
 resource "aws_instance" "python_node" {
   ami                    = "ami-054f42f3b4c78e8aa"
   instance_type          = "t2.medium"
