@@ -133,6 +133,65 @@ resource "aws_instance" "python_node" {
   }
 }
 
+
+
+#-------------------------------------------------------------
+#-Node 3: Backend/Tier 3 (Java 17) Security Group (port 9090)
+#-------------------------------------------------------------
+resource "aws_security_group" "java_sg" {
+  name        = "java_sg"
+  description = "Allow SSH and Port 9090 inbound, all outbound"
+  vpc_id      = "vpc-0554333af64d61d92"
+
+  # inbound SSH
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # inbound 8080 (app)
+  ingress {
+    description = "Pyhton App port 9090"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "java_app_security_group"
+  }
+
+}
+
+#########################################
+#-Python EC2 Instances
+#########################################
+
+resource "aws_instance" "java_node" {
+  ami                    = "ami-054f42f3b4c78e8aa"
+  instance_type          = "t2.medium"
+  subnet_id              = "subnet-03e8a88d085ee2c50"
+  vpc_security_group_ids = [aws_security_group.java_sg.id]
+  key_name               = "jenkinskp"
+
+  tags = {
+    Name = "java_node"
+  }
+}
+
 #------------------------------
 #Outputs- Public (external) IPs
 #------------------------------
@@ -146,22 +205,7 @@ output "python_node_ip" {
   value = aws_instance.python_node.public_ip
 }
 
-
-
-
-
-
-#-----------------------------------------------------
-#-Node 3: Backend/Tier 2 (Java 17) - runs on port 9090
-#-----------------------------------------------------
-resource "aws_instance" "backend_java" {
-  ami                    = "ami-05d520d4ac0d6e443"
-  instance_type          = "t2.medium"
-  subnet_id              = "subnet-03e8a88d085ee2c50"
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-  key_name               = "jenkinskp"
-
-  tags = {
-    Name = "Node-3-Backend-Java-9090"
-  }
+output "java_node_ip" {
+  description = "Public IP"
+  value = aws_instance.java_node.public_ip
 }
