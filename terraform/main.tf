@@ -61,14 +61,9 @@ resource "aws_security_group" "web_sg" {
 
 }
 
-########################
-#-EC2 Instances
-########################
-
-
-#--------------------------------
-#-Node 1: Frontend/Tier 1 (NGINX)
-#--------------------------------
+#####################################################
+#-Web EC2 Instances (Node 1: Frontend/Tier 1 (NGINX))
+#####################################################
 resource "aws_instance" "web_node" {
   ami                    = "ami-054f42f3b4c78e8aa"
   instance_type          = "t2.medium"
@@ -84,17 +79,81 @@ resource "aws_instance" "web_node" {
 #------------------------------------------------------
 #-Node 2: Backend/Tier 2 (Python 3) - runs on port 8080
 #------------------------------------------------------
-resource "aws_instance" "backend_python" {
-  ami                    = "ami-05d520d4ac0d6e443"
+resource "aws_security_group" "python_sg" {
+  name        = "python_sg"
+  description = "Allow SSH and Port 8080 inbound, all outbound"
+  vpc_id      = "vpc-0554333af64d61d92"
+
+  # inbound SSH
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # inbound 8080 (app)
+  ingress {
+    description = "Pyhton App port 8080"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "python_app_security_group"
+  }
+
+}
+
+########################
+#-Python EC2 Instances
+########################
+
+
+#--------------------------------
+#-Node 1: Frontend/Tier 1 (NGINX)
+#--------------------------------
+resource "aws_instance" "python_node" {
+  ami                    = "ami-054f42f3b4c78e8aa"
   instance_type          = "t2.medium"
   subnet_id              = "subnet-03e8a88d085ee2c50"
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  vpc_security_group_ids = [aws_security_group.python_sg.id]
   key_name               = "jenkinskp"
 
   tags = {
-    Name = "Node-2-Backend-Python-8080"
+    Name = "python_node"
   }
 }
+
+#------------------------------
+#Outputs- Public (external) IPs
+#------------------------------
+output "web_node_ip" {
+  description = "Public IP"
+  value = aws_instance.web_node.public_ip
+}
+
+output "python_node_ip" {
+  description = "Public IP"
+  value = aws_instance.python_node.public_ip
+}
+
+
+
+
+
 
 #-----------------------------------------------------
 #-Node 3: Backend/Tier 2 (Java 17) - runs on port 9090
