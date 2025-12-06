@@ -1,0 +1,36 @@
+pipeline  {
+    agent any 
+    
+    parameters {
+        string (
+            name: 'TARGET_IP',
+            defaultValue: 'ec2-3-252-230-89.eu-west-1.compute.amazonaws.com',
+            description: 'Enter  the traget EC2 IP address'
+        )
+    }
+    
+    stages {
+        
+        stage ('Install Packages   SSH') {
+            
+            steps {
+                sshagent (credentials: ['AWS-SSH-KEY']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no  ec2-user@172.31.27.145 '
+                        sudo yum install git -y; 
+                        sudo yum install nginx -y; 
+                        sudo systemctl start nginx;
+                        cd ~;
+                        rm -rf fruits-veg_market;
+                        git clone https://github.com/techbleat/fruits-veg_market.git;
+                        cd fruits-veg_market/;
+                        sed 's/FRUIT_MACHINE/${TARGET_IP}/g' -i web/index.html
+                        sudo cp web/index.html /usr/share/nginx/html;
+' 
+                    """
+                }
+
+            }
+        }
+    }
+}
