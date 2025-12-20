@@ -45,11 +45,13 @@ pipeline {
         }
         
         stage('Packer build') {
-             when {
+            when {
                 expression { params.PKR_ACTION == 'build' }
             }
             steps {
                 dir('packer') {
+                    // Always run init first to download plugins
+                    sh 'packer init .'
                     sh 'packer build .'
                 }
             }
