@@ -65,8 +65,8 @@ resource "aws_security_group" "web_sg" {
 #-Web EC2 Instances (Node 1: Frontend/Tier 1 (NGINX))
 #####################################################
 resource "aws_instance" "web_node" {
-  ami                    = "ami-054f42f3b4c78e8aa"
-  instance_type          = "t2.medium"
+  ami                    = "ami-058c0fd878f6ea57a"
+  instance_type          = "t2.small"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   key_name               = "jenkinskp"
@@ -122,8 +122,8 @@ resource "aws_security_group" "python_sg" {
 #########################################
 
 resource "aws_instance" "python_node" {
-  ami                    = "ami-054f42f3b4c78e8aa"
-  instance_type          = "t2.medium"
+  ami                    = "ami-02c055caa13328b94"
+  instance_type          = "t2.small"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.python_sg.id]
   key_name               = "jenkinskp"
@@ -181,8 +181,8 @@ resource "aws_security_group" "java_sg" {
 #########################################
 
 resource "aws_instance" "java_node" {
-  ami                    = "ami-054f42f3b4c78e8aa"
-  instance_type          = "t2.medium"
+  ami                    = "ami-02c055caa13328b94"
+  instance_type          = "t2.small"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.java_sg.id]
   key_name               = "jenkinskp"
