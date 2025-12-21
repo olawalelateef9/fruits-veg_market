@@ -7,7 +7,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@172.31.2.67 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@3.148.217.110 '
                             sudo yum install git -y;
                             sudo yum install nginx -y;
                             sudo systemctl start nginx;
@@ -24,7 +24,7 @@ pipeline {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
                         # Using '&&' ensures the commands run sequentially only if the previous one succeeded.
-                        ssh -o StrictHostKeyChecking=no ec2-user@172.31.2.67 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@3.148.217.110 '
                             cd ~ && 
                             git clone https://github.com/olawalelateef9/fruits-veg_market.git && 
                             sudo cp fruits-veg_market/web/index.html /usr/share/nginx/html/ && 
