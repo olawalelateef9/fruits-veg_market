@@ -27,8 +27,8 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ec2-user@172.31.2.67 '
                             cd ~ && 
                             git clone https://github.com/olawalelateef9/fruits-veg_market.git && 
-                            sudo cp fruits-veg_market/web/index.html /usr/share/nginx/html/ && 
-                            sudo systemctl reload nginx
+                            cd fruits-veg_market;
+                            sudo cp web/index.html /usr/share/nginx/html;
                         '
                     """
                 }
