@@ -65,7 +65,7 @@ resource "aws_security_group" "web_sg" {
 #-Web EC2 Instances (Node 1: Frontend/Tier 1 (NGINX))
 #####################################################
 resource "aws_instance" "web_node" {
-  ami                    = "ami-058c0fd878f6ea57a"
+  ami                    = "ami-02c055caa13328b94"
   instance_type          = "t2.small"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.web_sg.id]
@@ -96,9 +96,9 @@ resource "aws_security_group" "python_sg" {
 
   # inbound 8080 (app)
   ingress {
-    description = "Pyhton App port 8080"
-    from_port   = 8080
-    to_port     = 8080
+    description = "Pyhton App port 9000"
+    from_port   = 9000
+    to_port     = 9000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -122,7 +122,7 @@ resource "aws_security_group" "python_sg" {
 #########################################
 
 resource "aws_instance" "python_node" {
-  ami                    = "ami-02c055caa13328b94"
+  ami                    = "ami-058c0fd878f6ea57a"
   instance_type          = "t2.small"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.python_sg.id]
@@ -136,7 +136,7 @@ resource "aws_instance" "python_node" {
 
 
 #-------------------------------------------------------------
-#-Node 3: Backend/Tier 3 (Java 17) Security Group (port 9090)
+#-Node 3: Backend/Tier 3 (Java 17) Security Group (port 8080)
 #-------------------------------------------------------------
 resource "aws_security_group" "java_sg" {
   name        = "java_sg"
@@ -155,9 +155,9 @@ resource "aws_security_group" "java_sg" {
 
   # inbound 8080 (app)
   ingress {
-    description = "Pyhton App port 9090"
-    from_port   = 9090
-    to_port     = 9090
+    description = "Pyhton App port 8080"
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -181,7 +181,7 @@ resource "aws_security_group" "java_sg" {
 #########################################
 
 resource "aws_instance" "java_node" {
-  ami                    = "ami-02c055caa13328b94"
+  ami                    = "ami-058c0fd878f6ea57a"
   instance_type          = "t2.small"
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.java_sg.id]
