@@ -1,0 +1,10 @@
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/fruits-veg_market/python
+
+
+ExecStart=/bin/bash -c 'source .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 9000'
+
+Restart =always
+RestartSec=5
