@@ -1,0 +1,57 @@
+pipeline {
+    agent any 
+
+    parameters {
+        string(name: 'PYTHON_NODE', defaultValue: '3.144.249.171', description: 'Backend EC2 IP')
+        string(name: 'WEB_NODE', defaultValue: '3.137.162.252', description: 'Frontend EC2 IP')   
+    }
+
+    stages {
+        stage('Deploy Backend (Python)') {
+            steps {
+                sshagent(credentials: ['AWS_SSH_KEY']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ec2-user@${params.PYTHON_NODE} "
+                            sudo yum install git python3 -y
+                            rm -rf fruits-veg_market
+                            git clone https://github.com/techbleat/fruits-veg_market.git
+                            cd fruits-veg_market/python
+                            
+                            python3 -m venv .venv
+                            source .venv/bin/activate
+                            pip install --upgrade pip
+                            pip install -r requirements.txt
+                            
+                            sudo cp fruits.service /etc/systemd/system/fruits.service
+                            sudo systemctl daemon-reload
+                            sudo systemctl restart fruits.service
+                            sudo systemctl enable fruits.service
+                        "
+                    """
+                }
+            }
+        }
+
+        stage('Deploy Frontend (Nginx)') {
+            steps {
+                sshagent(credentials: ['AWS_SSH_KEY']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ec2-user@${params.WEB_NODE} "
+                            sudo yum install git nginx -y
+                            sudo systemctl start nginx
+                            
+                            rm -rf fruits-veg_market
+                            git clone https://github.com/techbleat/fruits-veg_market.git
+                            cd fruits-veg_market/
+                            
+                            # Replace placeholder with Python IP and Port 9000
+                            sed -i 's/FRUIT_MACHINE/${params.PYTHON_NODE}/g' web/index.html
+                            
+                            sudo cp web/index.html /usr/share/nginx/html/index.html
+                        "
+                    """
+                }
+            }
+        }
+    }
+}
