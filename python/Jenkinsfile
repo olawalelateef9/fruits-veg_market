@@ -5,7 +5,7 @@ pipeline  {
     parameters {
         string (
             name: 'TARGET_IP',
-            defaultValue: '172.31.24.209',
+            defaultValue: '3.144.249.171',
             description: 'Enter  the traget EC2 IP address'
         )
     }
@@ -15,7 +15,7 @@ pipeline  {
         stage ('Install Packages   SSH') {
             
             steps {
-                sshagent (credentials: ['AWS-SSH-KEY']) {
+                sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ec2-user@${TARGET_IP}  '
                         sudo yum install git -y; 
@@ -27,7 +27,7 @@ pipeline  {
                         source .venv/bin/activate;
                         python -m pip install -r requirements.txt;
                         sudo cp fruits.service /etc/systemd/system/fruits.service;
-                        sudo systemctl  deamon-reload;
+                        sudo systemctl  daemon-reload;
                         sudo systemctl restart fruits.service 
                         
 ' 
