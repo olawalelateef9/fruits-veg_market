@@ -65,7 +65,7 @@ resource "aws_security_group" "web_sg" {
 #-Web EC2 Instances (Node 1: Frontend/Tier 1 (NGINX))
 #####################################################
 resource "aws_instance" "web_node" {
-  frontend_ami           = var.frontend_ami
+  ami                    = var.frontend_ami
   instance_type          = var.project_instance_type
   subnet_id              = var.project_subnet
   vpc_security_group_ids = [aws_security_group.web_sg.id]
@@ -122,7 +122,7 @@ resource "aws_security_group" "python_sg" {
 #########################################
 
 resource "aws_instance" "python_node" {
-  backend_ami            = var.backend_ami
+  ami                    = var.backend_ami
   instance_type          = var.project_instance_type
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.python_sg.id]
@@ -181,7 +181,7 @@ resource "aws_security_group" "java_sg" {
 #########################################
 
 resource "aws_instance" "java_node" {
-  backend_ami            = var.backend_ami
+  ami                    = var.backend_ami
   instance_type          = var.project_instance_type
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.java_sg.id]
