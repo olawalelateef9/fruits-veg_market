@@ -42,7 +42,7 @@ pipeline {
             when { expression { params.TF_ACTION == 'plan' } }
             steps {
                 dir('terraform') {
-                    sh 'terraform plan -var-file=env.tfvars'
+                    sh 'terraform plan -var-file=dev.tfvars'
                 }
             }
         }
@@ -51,7 +51,7 @@ pipeline {
             when { expression { params.TF_ACTION == 'apply' } }
             steps {
                 dir('terraform') {
-                    sh 'terraform apply -var-file=env.tfvars -auto-approve'
+                    sh 'terraform apply -var-file=dev.tfvars -auto-approve'
                 }
             }
         }
@@ -60,7 +60,7 @@ pipeline {
             when { expression { params.TF_ACTION == 'destroy' } }
             steps {
                 dir('terraform') {
-                    sh 'terraform destroy -var-file=env.tfvars -auto-approve'
+                    sh 'terraform destroy -var-file=dev.tfvars -auto-approve'
                 }
             }
         }
