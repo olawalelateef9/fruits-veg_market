@@ -6,7 +6,7 @@ variable "frontend_ami" {
     type = string
 }
 
-variable "backendend_ami" {
+variable "backend_ami" {
     type = string
 }
 
