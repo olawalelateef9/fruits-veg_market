@@ -26,7 +26,7 @@ provider "aws" {
 resource "aws_security_group" "web_sg" {
   name        = "web_sg"
   description = "Allow SSH and Port 80 inbound, all outbound"
-  vpc_id      = "vpc-0554333af64d61d92"
+  vpc_id      = var.project_vpc
 
   # inbound SSH
 
@@ -65,11 +65,11 @@ resource "aws_security_group" "web_sg" {
 #-Web EC2 Instances (Node 1: Frontend/Tier 1 (NGINX))
 #####################################################
 resource "aws_instance" "web_node" {
-  ami                    = "ami-0290d86d3ba576b27"
-  instance_type          = "t2.small"
-  subnet_id              = "subnet-03e8a88d085ee2c50"
+  frontend_ami           = var.frontend_ami
+  instance_type          = var.project_instance_type
+  subnet_id              = var.project_subnet
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  key_name               = "jenkinskp"
+  key_name               = var.project_keyname
 
   tags = {
     Name = "web_node"
@@ -82,7 +82,7 @@ resource "aws_instance" "web_node" {
 resource "aws_security_group" "python_sg" {
   name        = "python_sg"
   description = "Allow SSH and Port 8080 inbound, all outbound"
-  vpc_id      = "vpc-0554333af64d61d92"
+  vpc_id      = var.project_vpc
 
   # inbound SSH
 
@@ -122,11 +122,11 @@ resource "aws_security_group" "python_sg" {
 #########################################
 
 resource "aws_instance" "python_node" {
-  ami                    = "ami-0611d741b48de1d0a"
-  instance_type          = "t2.small"
+  backend_ami            = var.backend_ami
+  instance_type          = var.project_instance_type
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.python_sg.id]
-  key_name               = "jenkinskp"
+  key_name               = var.project_keyname
 
   tags = {
     Name = "python_node"
@@ -141,7 +141,7 @@ resource "aws_instance" "python_node" {
 resource "aws_security_group" "java_sg" {
   name        = "java_sg"
   description = "Allow SSH and Port 9090 inbound, all outbound"
-  vpc_id      = "vpc-0554333af64d61d92"
+  vpc_id      = var.project_vpc
 
   # inbound SSH
 
@@ -181,11 +181,11 @@ resource "aws_security_group" "java_sg" {
 #########################################
 
 resource "aws_instance" "java_node" {
-  ami                    = "ami-0611d741b48de1d0a"
-  instance_type          = "t2.small"
+  backend_ami            = var.backend_ami
+  instance_type          = var.project_instance_type
   subnet_id              = "subnet-03e8a88d085ee2c50"
   vpc_security_group_ids = [aws_security_group.java_sg.id]
-  key_name               = "jenkinskp"
+  key_name               = var.project_keyname
 
   tags = {
     Name = "java_node"
