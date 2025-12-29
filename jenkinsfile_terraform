@@ -10,8 +10,8 @@ pipeline {
     }
     
     environment {
-        AWS_SECRET_ACCESS_KEY = credentials ('aws_secret_access_key')
-        AWS_ACCESS_KEY_ID     = credentials ('aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
         AWS_DEFAULT_REGION    = 'us-east-2'
     }
     
@@ -39,9 +39,7 @@ pipeline {
         }
         
         stage('Terraform plan') {
-            when {
-                expression { params.TF_ACTION == 'plan' }
-            }
+            when { expression { params.TF_ACTION == 'plan' } }
             steps {
                 dir('terraform') {
                     sh 'terraform plan -var-file=env.tfvars'
@@ -50,23 +48,19 @@ pipeline {
         }
         
         stage('Terraform apply') {
-            when {
-                expression { params.TF_ACTION == 'apply' }
-            }
+            when { expression { params.TF_ACTION == 'apply' } }
             steps {
                 dir('terraform') {
-                    sh 'terraform apply -var-file=env.tfvars' -auto-approve'
+                    sh 'terraform apply -var-file=env.tfvars -auto-approve'
                 }
             }
         }
         
         stage('Terraform destroy') {
-            when {
-                expression { params.TF_ACTION == 'destroy' }
-            }
+            when { expression { params.TF_ACTION == 'destroy' } }
             steps {
                 dir('terraform') {
-                    sh 'terraform destroy -var-file=env.tfvars' -auto-approve'
+                    sh 'terraform destroy -var-file=env.tfvars -auto-approve'
                 }
             }
         }
