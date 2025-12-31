@@ -33,3 +33,21 @@ variable "private_subnet_2_cidr" {
   type        = string
   default     = "10.0.4.0/24"
 }
+
+variable "web_ami" {
+  description = "AMI for web instances"
+  type        = string
+  default     = "ami-0290d86d3ba576b27"
+}
+
+variable "backend_ami" {
+  description = "AMI for backend instances"
+  type        = string
+  default     = "ami-0611d741b48de1d0a"
+}
+
+variable "instance_type" {
+  description = "Instance type for EC2 instances"
+  type        = string
+  default     = "t2.small"
+}
