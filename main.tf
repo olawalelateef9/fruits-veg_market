@@ -20,7 +20,7 @@ resource "aws_instance" "web" {
     count                = 2
     ami                  = var.web_ami
     instance_type        = var.instance_type
-    subnet_id            = aws_subnet.public[count.index].id
+    subnet_id            = count.index == 0 ? aws_subnet.public_subnet_1.id : aws_subnet.public_subnet_2.id
     vpc_security_group_ids = [aws_security_group.web_sg.id]
     associate_public_ip_address = true
 
@@ -34,7 +34,7 @@ resource "aws_instance" "backend" {
     count                = 2
     ami                  = var.backend_ami
     instance_type        = var.instance_type
-    subnet_id            = aws_subnet.private[count.index].id
+    subnet_id            = count.index == 0 ? aws_subnet.private_subnet_1.id : aws_subnet.private_subnet_2.id
     vpc_security_group_ids = [aws_security_group.backend_sg.id]
 
     tags = {
