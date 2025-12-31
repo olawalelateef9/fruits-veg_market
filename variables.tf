@@ -57,3 +57,9 @@ variable "vpc_id" {
   type        = string
   default     = "vpc-0554333af64d61d92"
 }
+
+variable "key_name" {
+  description = "EC2 Key Pair name for instances"
+  type        = string
+  default     = "jenkinskp"
+}
