@@ -45,7 +45,7 @@ resource "aws_instance" "backend" {
 # Web Security Group
 resource "aws_security_group" "web_sg" {
     name        = "web-sg"
-    vpc_id      = aws_vpc.main.id
+    vpc_id      = var.vpc_id
 
     ingress {
         from_port   = 22
@@ -83,7 +83,7 @@ resource "aws_security_group" "web_sg" {
 # Backend Security Group
 resource "aws_security_group" "backend_sg" {
     name        = "backend-sg"
-    vpc_id      = aws_vpc.main.id
+    vpc_id      = var.vpc_id
 
     ingress {
         from_port   = 22
@@ -103,7 +103,7 @@ resource "aws_security_group" "backend_sg" {
         from_port   = 5432
         to_port     = 5432
         protocol    = "tcp"
-        cidr_blocks = [aws_vpc.main.cidr_block]
+        cidr_blocks = ["10.0.0.0/16"]
     }
 
     egress {

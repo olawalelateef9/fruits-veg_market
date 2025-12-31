@@ -51,3 +51,9 @@ variable "instance_type" {
   type        = string
   default     = "t2.small"
 }
+
+variable "vpc_id" {
+  description = "VPC ID for instances"
+  type        = string
+  default     = "vpc-0554333af64d61d92"
+}
