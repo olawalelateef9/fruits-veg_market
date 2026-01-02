@@ -27,11 +27,14 @@ pipeline {
                             # 1. Remove existing directory to prevent "already exists" error
                             sudo rm -rf ~/fruits-veg_market &&
                             
-                            # 2. Clone fresh copy of the repository
-                            git clone https://github.com/olawalelateef9/fruits-veg_market.git && 
+                            # 2. Clone the specific branch
+                            git clone -b project_2 https://github.com/olawalelateef9/fruits-veg_market.git
+
+                            # 3. Enter the repository folder first!
+                            cd fruits-veg_market 
                             
-                            # 3. Copy index.html from the "frontend" folder 
-                            sudo cp frontend/index.html /usr/share/nginx/html
+                            # 4. Copy the frontend files to nginx directory
+                            sudo cp frontend/index.html /usr/share/nginx/html/
                         '
                     """
                 }
