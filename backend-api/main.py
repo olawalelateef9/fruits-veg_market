@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Optional, List
-
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 # DATABASE CONFIG
 # -----------------------------
 DATABASE_URL = (
-    "postgresql+psycopg://user:pass@db.server:5432/postgres"
+    "postgresql+psycopg://postgres:Youngman9!@project-2-database.c3smsacq41wa.us-east-2.rds.amazonaws.com:5432/postgres"
 )
 
 engine = create_engine(
