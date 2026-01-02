@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    stages {
+        
+        // --- Stage 1: Remote Installation ---
+        stage ('Installation of Packages') {
+            steps {
+                sshagent (credentials: ['AWS_SSH_KEY']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ec2-user@18.191.4.127 '
+                            sudo yum install git -y;
+                            sudo yum install nginx -y;
+                            sudo systemctl start nginx;
+                            sudo systemctl enable nginx;
+                        '
+                    """
+                }
+            }
+        }
+        
+        // --- Stage 2: Remote Deployment ---
+        stage ('Deployment') {
+            steps {
+                sshagent (credentials: ['AWS_SSH_KEY']) {
+                    sh """
+                        # Using '&&' ensures the commands run sequentially only if the previous one succeeded.
+                        ssh -o StrictHostKeyChecking=no ec2-user@18.191.4.127 '
+                            cd ~ && 
+                            git clone https://github.com/olawalelateef9/fruits-veg_market.git && 
+                            cd fruits-veg_market;
+                            sudo cp web/index.html /usr/share/nginx/html;
+                        '
+                    """
+                }
+            }
+        }
+    }
+}
