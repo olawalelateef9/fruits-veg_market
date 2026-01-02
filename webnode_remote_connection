@@ -23,12 +23,15 @@ pipeline {
             steps {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
-                        # Using '&&' ensures the commands run sequentially only if the previous one succeeded.
                         ssh -o StrictHostKeyChecking=no ec2-user@18.191.4.127 '
-                            cd ~ && 
+                            # 1. Remove existing directory to prevent "already exists" error
+                            sudo rm -rf ~/fruits-veg_market &&
+                            
+                            # 2. Clone fresh copy of the repository
                             git clone https://github.com/olawalelateef9/fruits-veg_market.git && 
-                            cd fruits-veg_market;
-                            sudo cp web/index.html /usr/share/nginx/html;
+                            
+                            # 3. Copy index.html from the "frontend" folder 
+                            sudo cp frontend/index.html /usr/share/nginx/html
                         '
                     """
                 }
