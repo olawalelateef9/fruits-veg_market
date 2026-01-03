@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    stages {
+        stage ('Deploy to Private Backend') {
+            steps {
+                sshagent (credentials: ['AWS_SSH_KEY']) {
+                    sh """
+                        # We use the Web Node (18.191.4.127) as the gateway to reach the Private Backend (10.0.3.127)
+                        ssh -o StrictHostKeyChecking=no -J ec2-user@18.191.4.127 ec2-user@10.0.3.127 '
+                            sudo yum install git python3 python3-pip -y;
+                            sudo rm -rf ~/fruits-veg_market;
+                            git clone -b project_2 https://github.com/olawalelateef9/fruits-veg_market.git;
+                            cd fruits-veg_market;
+                            pip3 install fastapi uvicorn sqlalchemy psycopg[binary] --user;
+                            pkill uvicorn || true;
+                            nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > fastapi.log 2>&1 &
+                        '
+                    """
+                }
+            }
+        }
+    }
+}
