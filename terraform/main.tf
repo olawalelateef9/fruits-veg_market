@@ -14,6 +14,7 @@ terraform {
     }
   }
 }
+
 provider "aws" {
   region = var.aws_region
 }
@@ -33,7 +34,9 @@ resource "aws_instance" "web" {
   }
 }
 
-# Backend Instances (FastAPI)
+# Backend Instances (FastAPI) - KEPT IN PRIVATE SUBNET
+# Note: These will still have timeout errors if they try to run yum/dnf update
+# until you add a NAT Gateway later.
 resource "aws_instance" "backend" {
   count                  = 2
   ami                    = var.backend_ami
@@ -41,6 +44,7 @@ resource "aws_instance" "backend" {
   subnet_id              = count.index == 0 ? aws_subnet.private_subnet_1.id : aws_subnet.private_subnet_2.id
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   key_name               = var.key_name
+  associate_public_ip_address = false 
 
   tags = {
     Name = "backend-instance-${count.index + 1}"
@@ -66,13 +70,6 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -80,10 +77,9 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "web-sg"
-  }
+  tags = { Name = "web-sg" }
 }
+
 # Jenkins Security Group
 resource "aws_security_group" "jenkins_sg" {
   name   = "jenkins-sg"
@@ -96,7 +92,6 @@ resource "aws_security_group" "jenkins_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Jenkins web UI (8080)
   ingress {
     from_port   = 8080
     to_port     = 8080
@@ -111,25 +106,26 @@ resource "aws_security_group" "jenkins_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "jenkins-sg"
-  }
+  tags = { Name = "jenkins-sg" }
 }
 
-# Jenkins EC2 instance for project tooling
+# Jenkins EC2 instance - MOVED TO PUBLIC SUBNET
 resource "aws_instance" "project_tool_server" {
   count                       = 1
   ami                         = var.backend_ami
   instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.private_subnet_1.id
+  # UPDATED: Now using Public Subnet 1
+  subnet_id                   = aws_subnet.public_subnet_1.id
   vpc_security_group_ids      = [aws_security_group.jenkins_sg.id]
   key_name                    = var.key_name
-  associate_public_ip_address = false
+  # UPDATED: Assigned Public IP so it can reach Amazon Linux repos
+  associate_public_ip_address = true
 
   tags = {
     Name = "project_tool_server"
   }
 }
+
 # Backend Security Group
 resource "aws_security_group" "backend_sg" {
   name   = "backend-sg"
@@ -149,20 +145,6 @@ resource "aws_security_group" "backend_sg" {
     security_groups = [aws_security_group.web_sg.id]
   }
 
-  ingress {
-    from_port       = 8000
-    to_port         = 8000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.jenkins_sg.id]
-  }
-
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -170,7 +152,5 @@ resource "aws_security_group" "backend_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "backend-sg"
-  }
+  tags = { Name = "backend-sg" }
 }
