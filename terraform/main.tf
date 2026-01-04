@@ -165,7 +165,7 @@ resource "aws_security_group" "db_sg" {
 resource "aws_db_instance" "project_db" {
   identifier           = "project-database"
   engine               = "postgres"
-  instance_class       = "db.t3.micro"
+  instance_class       = "db.t4g.micro"
   allocated_storage    = 20       # Required: Match your current size (e.g., 20)
   username             = "postgres" # Required: Put your current master username
   password             = "Youngman9!" # Required for the block to be valid
