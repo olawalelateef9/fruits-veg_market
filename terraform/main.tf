@@ -53,14 +53,39 @@ resource "aws_instance" "project_tool_server" {
   subnet_id                   = aws_subnet.public_subnet_1.id
   vpc_security_group_ids      = [aws_security_group.jenkins_sg.id]
   key_name                    = var.key_name
-  associate_public_ip_address = true # Needed for GitHub/Pip downloads
+  associate_public_ip_address = true
 
   tags = { Name = "project_tool_server" }
 }
 
-# --- 4. SECURITY GROUPS ---
+# --- 4. DATABASE RESOURCES ---
 
-# Web SG
+# NEW: DB Subnet Group (Fixes the "2 AZ requirement" error)
+resource "aws_db_subnet_group" "project_db_subnet_group" {
+  name       = "project-db-subnet-group"
+  subnet_ids = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
+
+  tags = { Name = "Project DB Subnet Group" }
+}
+
+# The Database Instance
+resource "aws_db_instance" "project_db" {
+  identifier           = "project-database"
+  engine               = "postgres"
+  instance_class       = "db.t4g.micro"
+  allocated_storage    = 20
+  username             = "postgres"
+  password             = "YOUR_SECRET_PASSWORD" # Use your actual DB password here
+  
+  db_subnet_group_name = aws_db_subnet_group.project_db_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  
+  skip_final_snapshot  = true
+  publicly_accessible  = false
+}
+
+# --- 5. SECURITY GROUPS ---
+
 resource "aws_security_group" "web_sg" {
   name   = "web-sg"
   vpc_id = aws_vpc.project_network.id
@@ -87,7 +112,6 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-# Jenkins SG
 resource "aws_security_group" "jenkins_sg" {
   name   = "jenkins-sg"
   vpc_id = aws_vpc.project_network.id
@@ -114,7 +138,6 @@ resource "aws_security_group" "jenkins_sg" {
   }
 }
 
-# Backend SG
 resource "aws_security_group" "backend_sg" {
   name   = "backend-sg"
   vpc_id = aws_vpc.project_network.id
@@ -123,7 +146,7 @@ resource "aws_security_group" "backend_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr] # Only allow internal SSH
+    cidr_blocks = [var.vpc_cidr]
   }
 
   ingress {
@@ -141,18 +164,16 @@ resource "aws_security_group" "backend_sg" {
   }
 }
 
-# Database SG
 resource "aws_security_group" "db_sg" {
   name        = "db-sg"
   description = "Allow inbound traffic from backend only"
   vpc_id      = aws_vpc.project_network.id
 
-  # THE HANDSHAKE: Allow Port 5432 ONLY from Backend SG
   ingress {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.backend_sg.id]
+    security_groups = [aws_security_group.backend_sg.id] # Handshake
   }
 
   egress {
@@ -162,15 +183,8 @@ resource "aws_security_group" "db_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-resource "aws_db_instance" "project_db" {
-  identifier           = "project-database"
-  engine               = "postgres"
-  instance_class       = "db.t4g.micro"
-  allocated_storage    = 20       # Required: Match your current size (e.g., 20)
-  username             = "postgres" # Required: Put your current master username
-  password             = "Youngman9!" # Required for the block to be valid
-  
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
-  skip_final_snapshot  = true
-  publicly_accessible  = false
+
+# --- 6. OUTPUTS ---
+output "rds_endpoint" {
+  value = aws_db_instance.project_db.endpoint
 }
