@@ -6,7 +6,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.127 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 '
                             # Install Python and Git if they are missing
                             sudo yum install git python3 python3-pip -y;
                         '
@@ -19,7 +19,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.127 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 '
                             # 1. Clean up and Clone
                             sudo rm -rf ~/fruits-veg_market;
                             git clone -b project_2 https://github.com/olawalelateef9/fruits-veg_market.git;
