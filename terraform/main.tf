@@ -130,7 +130,7 @@ resource "aws_instance" "project_tool_server" {
 # Backend Security Group
 resource "aws_security_group" "backend_sg" {
     name        = "backend-sg"
-    vpc_id      = var.vpc_id
+    vpc_id      = aws_vpc.project_network.id
 
     ingress {
         from_port   = 22
