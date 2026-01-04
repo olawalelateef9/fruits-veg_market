@@ -1,5 +1,4 @@
-
-# VPC
+# 1. VPC Configuration
 resource "aws_vpc" "project_network" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -10,7 +9,7 @@ resource "aws_vpc" "project_network" {
   }
 }
 
-# Internet Gateway
+# 2. Internet Gateway (For Public Subnets)
 resource "aws_internet_gateway" "project_igw" {
   vpc_id = aws_vpc.project_network.id
 
@@ -19,7 +18,7 @@ resource "aws_internet_gateway" "project_igw" {
   }
 }
 
-# Public Subnets
+# 3. Public Subnets (For Web and Jenkins)
 resource "aws_subnet" "public_subnet_1" {
   vpc_id            = aws_vpc.project_network.id
   cidr_block        = var.public_subnet_1_cidr
@@ -42,7 +41,7 @@ resource "aws_subnet" "public_subnet_2" {
   }
 }
 
-# Private Subnets
+# 4. Private Subnets (For Backend/Database)
 resource "aws_subnet" "private_subnet_1" {
   vpc_id            = aws_vpc.project_network.id
   cidr_block        = var.private_subnet_1_cidr
@@ -65,7 +64,7 @@ resource "aws_subnet" "private_subnet_2" {
   }
 }
 
-# Public Route Table
+# 5. Public Route Table (Connected to Internet)
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.project_network.id
 
@@ -79,7 +78,6 @@ resource "aws_route_table" "public_rt" {
   }
 }
 
-# Associate Public Subnets with Public Route Table
 resource "aws_route_table_association" "public_subnet_1_assoc" {
   subnet_id      = aws_subnet.public_subnet_1.id
   route_table_id = aws_route_table.public_rt.id
@@ -90,7 +88,7 @@ resource "aws_route_table_association" "public_subnet_2_assoc" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Private Route Table
+# 6. Private Route Table
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.project_network.id
 
@@ -99,7 +97,6 @@ resource "aws_route_table" "private_rt" {
   }
 }
 
-# Associate Private Subnets with Private Route Table
 resource "aws_route_table_association" "private_subnet_1_assoc" {
   subnet_id      = aws_subnet.private_subnet_1.id
   route_table_id = aws_route_table.private_rt.id
@@ -108,4 +105,22 @@ resource "aws_route_table_association" "private_subnet_1_assoc" {
 resource "aws_route_table_association" "private_subnet_2_assoc" {
   subnet_id      = aws_subnet.private_subnet_2.id
   route_table_id = aws_route_table.private_rt.id
+}
+
+# 7. S3 GATEWAY ENDPOINT 
+# This allows private instances to download Linux updates directly from AWS internal network
+resource "aws_vpc_endpoint" "s3_gateway" {
+  vpc_id            = aws_vpc.project_network.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
+  vpc_endpoint_type = "Gateway"
+
+  # Links the endpoint to your route tables so instances know how to use it
+  route_table_ids = [
+    aws_route_table.public_rt.id,
+    aws_route_table.private_rt.id
+  ]
+
+  tags = {
+    Name = "s3-endpoint-for-updates"
+  }
 }
