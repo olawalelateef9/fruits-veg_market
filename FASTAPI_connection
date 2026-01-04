@@ -22,13 +22,13 @@ pipeline {
                 sshagent(['AWS_SSH_KEY']) {
                     sh """
                         # 1. Ensure folder exists on the remote private server
-                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 'mkdir -p ~/fruits-veg_market'
+                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.4.156 'mkdir -p ~/fruits-veg_market'
                         
                         # 2. Push code and dependencies from Jenkins to Backend
-                        scp -o StrictHostKeyChecking=no -r ./* ec2-user@10.0.3.151:~/fruits-veg_market/
+                        scp -o StrictHostKeyChecking=no -r ./* ec2-user@10.0.4.156:~/fruits-veg_market/
                         
                         # 3. Run installation and start app
-                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.4.156 '
                             cd ~/fruits-veg_market
                             
                             # Install Pip (Allowed via S3 Gateway in networks.tf)
