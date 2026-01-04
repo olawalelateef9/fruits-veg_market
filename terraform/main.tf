@@ -14,6 +14,9 @@ terraform {
     }
   }
 }
+provider "aws" {
+  region = var.aws_region
+}
 
 # Web Instances (Frontend with Nginx)
 resource "aws_instance" "web" {
