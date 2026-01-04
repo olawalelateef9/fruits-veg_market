@@ -1,50 +1,49 @@
 pipeline {
     agent any
     stages {
-        
-        stage ('Backend Environment Setup') {
+        stage('Prepare & Download (on Jenkins)') {
             steps {
-                sshagent (credentials: ['AWS_SSH_KEY']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 '
-                            # Install Python and Git if they are missing
-                            sudo yum install git python3 python3-pip -y;
-                        '
-                    """
+                script {
+                    // Pull code from GitHub to Jenkins Workspace
+                    checkout scm 
+                    
+                    // Create requirements file if missing
+                    sh 'echo "fastapi\nuvicorn\nsqlalchemy\npsycopg[binary]" > requirements.txt'
+                    
+                    // Download installer files (.whl) to Jenkins for offline transfer
+                    sh "pip3 download -r requirements.txt -d ./dependencies"
                 }
             }
-        }
-        
-        stage ('Deploy FastAPI App') {
+        } // End Prepare Stage
+
+        stage('Deploy to Private Backend') {
             steps {
-                sshagent (credentials: ['AWS_SSH_KEY']) {
+                // Ensure this matches your Jenkins Credential ID exactly
+                sshagent(['AWS_SSH_KEY']) {
                     sh """
+                        # 1. Ensure folder exists on the remote private server
+                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 'mkdir -p ~/fruits-veg_market'
+                        
+                        # 2. Push code and dependencies from Jenkins to Backend
+                        scp -o StrictHostKeyChecking=no -r ./* ec2-user@10.0.3.151:~/fruits-veg_market/
+                        
+                        # 3. Run installation and start app
                         ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 '
-                            # 1. Clean up and Clone
-                            sudo rm -rf ~/fruits-veg_market;
-                            git clone -b project_2 https://github.com/olawalelateef9/fruits-veg_market.git;
+                            cd ~/fruits-veg_market
                             
-                            # 2. Navigate to the project folder
-                            cd fruits-veg_market;
+                            # Install Pip (Allowed via S3 Gateway in networks.tf)
+                            sudo yum install python3-pip -y
                             
-                            # 3. Install required Python packages
-                            # psycopg[binary] is required for the connection string in your main.py
-                            pip3 install fastapi uvicorn sqlalchemy psycopg[binary] --user;
+                            # Install packages from the local 'dependencies' folder we just pushed
+                            pip3 install --no-index --find-links=./dependencies -r requirements.txt
                             
-                            # 4. Stop any old version of the API currently running
-                            pkill uvicorn || true;
-                            
-                            # 5. Start the API in the background (nohup keeps it alive after exit)
-                            # Using 0.0.0.0 allows it to accept connections from your Web Node
+                            # Restart Uvicorn
+                            pkill uvicorn || true
                             nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > fastapi.log 2>&1 &
-                            
-                            # 6. Wait 2 seconds and check if it stayed alive
-                            sleep 2;
-                            ps aux | grep uvicorn;
                         '
                     """
                 }
             }
-        }
-    }
-}
+        } // End Deploy Stage
+    } // End Stages block
+} // End Pipeline block
