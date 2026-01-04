@@ -47,7 +47,7 @@ resource "aws_instance" "backend" {
 # Web Security Group
 resource "aws_security_group" "web_sg" {
     name        = "web-sg"
-    vpc_id      = var.vpc_id
+    vpc_id      = aws_vpc.project_network.id
 
     ingress {
         from_port   = 22
@@ -84,7 +84,7 @@ resource "aws_security_group" "web_sg" {
 # Jenkins Security Group
 resource "aws_security_group" "jenkins_sg" {
     name   = "jenkins-sg"
-    vpc_id = var.vpc_id
+    vpc_id = aws_vpc.project_network.id
 
     ingress {
         from_port   = 22
