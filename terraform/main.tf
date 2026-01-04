@@ -19,7 +19,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Web Instances (Frontend with Nginx)
+# --- 1. WEB INSTANCES (Public) ---
 resource "aws_instance" "web" {
   count                       = 2
   ami                         = var.web_ami
@@ -29,14 +29,10 @@ resource "aws_instance" "web" {
   key_name                    = var.key_name
   associate_public_ip_address = true
 
-  tags = {
-    Name = "web-instance-${count.index + 1}"
-  }
+  tags = { Name = "web-instance-${count.index + 1}" }
 }
 
-# Backend Instances (FastAPI) - KEPT IN PRIVATE SUBNET
-# Note: These will still have timeout errors if they try to run yum/dnf update
-# until you add a NAT Gateway later.
+# --- 2. BACKEND INSTANCES (Private) ---
 resource "aws_instance" "backend" {
   count                  = 2
   ami                    = var.backend_ami
@@ -44,14 +40,27 @@ resource "aws_instance" "backend" {
   subnet_id              = count.index == 0 ? aws_subnet.private_subnet_1.id : aws_subnet.private_subnet_2.id
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   key_name               = var.key_name
-  associate_public_ip_address = false 
+  associate_public_ip_address = false
 
-  tags = {
-    Name = "backend-instance-${count.index + 1}"
-  }
+  tags = { Name = "backend-instance-${count.index + 1}" }
 }
 
-# Web Security Group
+# --- 3. JENKINS TOOL SERVER (Public) ---
+resource "aws_instance" "project_tool_server" {
+  count                       = 1
+  ami                         = var.backend_ami
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public_subnet_1.id
+  vpc_security_group_ids      = [aws_security_group.jenkins_sg.id]
+  key_name                    = var.key_name
+  associate_public_ip_address = true # Needed for GitHub/Pip downloads
+
+  tags = { Name = "project_tool_server" }
+}
+
+# --- 4. SECURITY GROUPS ---
+
+# Web SG
 resource "aws_security_group" "web_sg" {
   name   = "web-sg"
   vpc_id = aws_vpc.project_network.id
@@ -76,11 +85,9 @@ resource "aws_security_group" "web_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = { Name = "web-sg" }
 }
 
-# Jenkins Security Group
+# Jenkins SG
 resource "aws_security_group" "jenkins_sg" {
   name   = "jenkins-sg"
   vpc_id = aws_vpc.project_network.id
@@ -105,28 +112,9 @@ resource "aws_security_group" "jenkins_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = { Name = "jenkins-sg" }
 }
 
-# Jenkins EC2 instance - MOVED TO PUBLIC SUBNET
-resource "aws_instance" "project_tool_server" {
-  count                       = 1
-  ami                         = var.backend_ami
-  instance_type               = var.instance_type
-  # UPDATED: Now using Public Subnet 1
-  subnet_id                   = aws_subnet.public_subnet_1.id
-  vpc_security_group_ids      = [aws_security_group.jenkins_sg.id]
-  key_name                    = var.key_name
-  # UPDATED: Assigned Public IP so it can reach Amazon Linux repos
-  associate_public_ip_address = true
-
-  tags = {
-    Name = "project_tool_server"
-  }
-}
-
-# Backend Security Group
+# Backend SG
 resource "aws_security_group" "backend_sg" {
   name   = "backend-sg"
   vpc_id = aws_vpc.project_network.id
@@ -135,7 +123,7 @@ resource "aws_security_group" "backend_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr] # Only allow internal SSH
   }
 
   ingress {
@@ -151,6 +139,38 @@ resource "aws_security_group" "backend_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
 
-  tags = { Name = "backend-sg" }
+# Database SG
+resource "aws_security_group" "db_sg" {
+  name        = "db-sg"
+  description = "Allow inbound traffic from backend only"
+  vpc_id      = aws_vpc.project_network.id
+
+  # THE HANDSHAKE: Allow Port 5432 ONLY from Backend SG
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.backend_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+resource "aws_db_instance" "project_db" {
+  identifier           = "project-database"
+  engine               = "postgres"
+  instance_class       = "db.t3.micro"
+  allocated_storage    = 20       # Required: Match your current size (e.g., 20)
+  username             = "postgres" # Required: Put your current master username
+  password             = "Youngman9!" # Required for the block to be valid
+  
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  skip_final_snapshot  = true
+  publicly_accessible  = false
 }
