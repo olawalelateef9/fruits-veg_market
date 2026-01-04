@@ -7,7 +7,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@18.191.4.127 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@18.188.157.42 '
                             sudo yum install git -y;
                             sudo yum install nginx -y;
                             sudo systemctl start nginx;
@@ -23,7 +23,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['AWS_SSH_KEY']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@18.191.4.127 '
+                        ssh -o StrictHostKeyChecking=no ec2-user@18.188.157.42 '
                             # 1. Remove existing directory to prevent "already exists" error
                             sudo rm -rf ~/fruits-veg_market &&
                             
