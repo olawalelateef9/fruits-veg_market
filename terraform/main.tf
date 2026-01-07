@@ -75,7 +75,7 @@ resource "aws_db_instance" "project_db" {
   instance_class       = "db.t4g.micro"
   allocated_storage    = 20
   username             = "postgres"
-  password             = "YOUR_SECRET_PASSWORD" # Use your actual DB password here
+  password             = "Youngman9!" 
   
   db_subnet_group_name = aws_db_subnet_group.project_db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.db_sg.id]
