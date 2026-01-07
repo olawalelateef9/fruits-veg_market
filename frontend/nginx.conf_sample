@@ -49,7 +49,7 @@ http {
         location = /50x.html {
         }
 location /api/ {
-        proxy_pass http://10.0.4.156:8000;
+        proxy_pass http://10.0.3.151:8000;
         proxy_http_version 1.1;
 
         proxy_set_header Host $host;
