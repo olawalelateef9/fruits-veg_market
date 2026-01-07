@@ -11,35 +11,38 @@ pipeline {
                     sh 'echo "fastapi\nuvicorn\nsqlalchemy\npsycopg[binary]" > requirements.txt'
                     
                     // Download installer files (.whl) to Jenkins for offline transfer
-                    sh "pip3 download -r requirements.txt -d ./dependencies"
+                    sh "pip3 download -r backend-api/requirements.txt -d ./dependencies"
                 }
             }
         } // End Prepare Stage
 
         stage('Deploy to Private Backend') {
             steps {
-                // Ensure this matches your Jenkins Credential ID exactly
+                // Ensure this matches the SSH key credential ID in Jenkins
                 sshagent(['AWS_SSH_KEY']) {
                     sh """
-                        # 1. Ensure folder exists on the remote private server
+                        # 1. Making sure folder exists on the remote private server
                         ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 'mkdir -p ~/fruits-veg_market'
                         
-                        # 2. Push code and dependencies from Jenkins to Backend
+                        # 2. Pushing code and dependencies from Jenkins to Backend
                         scp -o StrictHostKeyChecking=no -r ./* ec2-user@10.0.3.151:~/fruits-veg_market/
                         
-                        # 3. Run installation and start app
+                        # 3. Running installation and start app
                         ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.151 '
-                            cd ~/fruits-veg_market
+                            # Moving into the folder where main.py lives
+                            cd ~/fruits-veg_market/backend-api
                             
-                            # Install Pip (Allowed via S3 Gateway in networks.tf)
+                            # Installing Pip if not present
                             sudo yum install python3-pip -y
                             
-                            # Install packages from the local 'dependencies' folder we just pushed
-                            pip3 install --no-index --find-links=./dependencies -r requirements.txt
+                            # Installing packages using the dependencies folder in the parent directory
+                            pip3 install --no-index --find-links=../dependencies -r requirements.txt
                             
-                            # Restart Uvicorn
+                            # Killing any running uvicorn process
                             pkill uvicorn || true
-                            nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > fastapi.log 2>&1 &
+                            
+                            # Starting Uvicorn and save logs to the parent directory for easy access
+                            nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > ../fastapi.log 2>&1 &
                         '
                     """
                 }
