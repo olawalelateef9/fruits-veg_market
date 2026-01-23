@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+     parameters {
+        choice(
+            name: 'PKR_ACTION', 
+            choices: ['init', 'validate', 'build'],
+            description: 'Choose the Packer action to perform'
+        )
+    }
+
+    environment {
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
+        AWS_DEFAULT_REGION    = 'us-east-2'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Packer init') {
+             when {
+                expression { params.PKR_ACTION == 'init' }
+            }
+            steps {
+                dir('packer') {
+                    sh 'packer init .'
+                }
+            }
+        }
+        
+        stage('Packer validate') {
+             when {
+                expression { params.PKR_ACTION == 'validate' }
+            }
+            steps {
+                dir('packer') {
+                    sh 'packer validate .'
+                }
+            }
+        }
+        
+        stage('Packer build') {
+            when {
+                expression { params.PKR_ACTION == 'build' }
+            }
+            steps {
+                dir('packer') {
+                    // Always run init first to download plugins
+                    sh 'packer init .'
+                    sh 'packer build .'
+                }
+            }
+        }
+    }
+}
