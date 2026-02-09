@@ -37,13 +37,13 @@ variable "private_subnet_2_cidr" {
 variable "web_ami" {
   description = "AMI for web instances"
   type        = string
-  default     = "ami-0290d86d3ba576b27"
+  default     = "ami-0c613eb0498cd4917"
 }
 
 variable "backend_ami" {
   description = "AMI for backend instances"
   type        = string
-  default     = "ami-0611d741b48de1d0a"
+  default     = "ami-0d1bf736a548b7e67"
 }
 
 variable "instance_type" {
