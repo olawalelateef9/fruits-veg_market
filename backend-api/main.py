@@ -266,7 +266,7 @@ def seed_data():
 # -----------------------------
 # FASTAPI APP
 # -----------------------------
-app = FastAPI(title="Techleat Superstore API (MariaDB)")
+app = FastAPI(title="Techbleat Superstore API (MariaDB)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -281,7 +281,7 @@ def startup():
     Base.metadata.create_all(engine)
     seed_data()
 
-@app.get("/api/products")
+@app.get("/products")
 def get_products():
     with Session(engine) as session:
         rows = session.execute(select(Product)).scalars().all()
