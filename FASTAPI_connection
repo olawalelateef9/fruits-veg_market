@@ -4,49 +4,49 @@ pipeline {
         stage('Prepare & Download (on Jenkins)') {
             steps {
                 script {
-                    // Pull code from GitHub to Jenkins Workspace
                     checkout scm 
                     
-                    // Create requirements file if missing
-                    sh 'echo "fastapi\nuvicorn\nsqlalchemy\npsycopg[binary]" > requirements.txt'
+                    // 1. Ensure the requirements file exists in the correct folder
+                    sh 'echo "fastapi\nuvicorn\nsqlalchemy\npsycopg[binary]" > backend-api/requirements.txt'
                     
-                    // Download installer files (.whl) to Jenkins for offline transfer
+                    // 2. Create the folder locally before downloading
+                    sh 'mkdir -p dependencies'
+                    
+                    // 3. Download to the local folder
                     sh "pip3 download -r backend-api/requirements.txt -d ./dependencies"
                 }
             }
-        } // End Prepare Stage
+        }
 
         stage('Deploy to Private Backend') {
             steps {
-                // Ensure this matches the SSH key credential ID in Jenkins
                 sshagent(['AWS_SSH_KEY']) {
                     sh """
-                        # 1. Making sure folder exists on the remote private server
-                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.18 'mkdir -p ~/fruits-veg_market'
+                        # 1. Prepare directory structure on private server
+                        ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.18 'mkdir -p ~/fruits-veg_market/dependencies'
                         
-                        # 2. Pushing code and dependencies from Jenkins to Backend
-                        scp -o StrictHostKeyChecking=no -r ./* ec2-user@10.0.3.18:~/fruits-veg_market/
+                        # 2. Push dependencies first
+                        scp -o StrictHostKeyChecking=no -r ./dependencies/* ec2-user@10.0.3.18:~/fruits-veg_market/dependencies/
                         
-                        # 3. Running installation and start app
+                        # 3. Push code
+                        scp -o StrictHostKeyChecking=no -r ./backend-api/* ec2-user@10.0.3.18:~/fruits-veg_market/backend-api/
+                        
+                        # 4. Install and Start
                         ssh -o StrictHostKeyChecking=no ec2-user@10.0.3.18 '
-                            # Moving into the folder where main.py lives
                             cd ~/fruits-veg_market/backend-api
-                            
-                            # Installing Pip if not present
                             sudo yum install python3-pip -y
                             
-                            # Installing packages using the dependencies folder in the parent directory
+                            # Install from the folder one level up
                             pip3 install --no-index --find-links=../dependencies -r requirements.txt
                             
-                            # Killing any running uvicorn process
                             pkill uvicorn || true
                             
-                            # Starting Uvicorn and save logs to the parent directory for easy access
+                            # STARTING APP: 'main' is filename, 'app' is FastAPI instance
                             nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > ../fastapi.log 2>&1 &
                         '
                     """
                 }
             }
-        } // End Deploy Stage
-    } // End Stages block
-} // End Pipeline block
+        }
+    }
+}

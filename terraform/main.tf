@@ -43,8 +43,15 @@ resource "aws_instance" "backend" {
   associate_public_ip_address = false
 
   tags = { Name = "backend-instance-${count.index + 1}" }
-}
 
+  # --- Automated Database Connection ---
+  user_data = <<-EOF
+  #!/bin/bash
+  echo "DATABASE_URL=postgresql://postgres:Youngman9!@${aws_db_instance.project_db.endpoint}:5432/postgres" > /home/ec2-user/.env
+  # IMPORTANT: Update the line below to match your service name!
+  sudo systemctl restart app
+  EOF
+}
 # --- 3. JENKINS TOOL SERVER (Public) ---
 resource "aws_instance" "project_tool_server" {
   count                       = 1
